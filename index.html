@@ -1,0 +1,1624 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SurveyLab — NCEC104 Virtual Practicals</title>
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #0a0e1a;
+  --surface: #111827;
+  --card: #1a2235;
+  --border: #2a3a55;
+  --accent: #f59e0b;
+  --accent2: #38bdf8;
+  --accent3: #34d399;
+  --text: #e2e8f0;
+  --muted: #64748b;
+  --danger: #f87171;
+  --mono: 'Space Mono', monospace;
+  --sans: 'Syne', sans-serif;
+}
+* { margin:0; padding:0; box-sizing:border-box; }
+body { background:var(--bg); color:var(--text); font-family:var(--sans); min-height:100vh; overflow-x:hidden; }
+
+/* HEADER */
+header {
+  background: linear-gradient(135deg, #0a0e1a 0%, #0f172a 50%, #0a1628 100%);
+  border-bottom: 1px solid var(--border);
+  padding: 0 2rem;
+  position: sticky; top:0; z-index:100;
+  display:flex; align-items:center; justify-content:space-between;
+  height: 64px;
+}
+.logo { font-family:var(--mono); font-size:1.1rem; color:var(--accent); letter-spacing:0.1em; }
+.logo span { color:var(--accent2); }
+.nav-pills { display:flex; gap:0.5rem; }
+.nav-pill { background:transparent; border:1px solid var(--border); color:var(--muted); padding:0.4rem 1rem; border-radius:999px; font-family:var(--mono); font-size:0.72rem; cursor:pointer; transition:all 0.2s; }
+.nav-pill:hover, .nav-pill.active { border-color:var(--accent); color:var(--accent); background:rgba(245,158,11,0.08); }
+
+/* HERO */
+.hero { padding: 4rem 2rem 3rem; text-align:center; position:relative; overflow:hidden; }
+.hero::before {
+  content:''; position:absolute; inset:0;
+  background: radial-gradient(ellipse 80% 60% at 50% 0%, rgba(56,189,248,0.08) 0%, transparent 70%);
+}
+.hero-eyebrow { font-family:var(--mono); font-size:0.75rem; color:var(--accent2); letter-spacing:0.25em; text-transform:uppercase; margin-bottom:1rem; }
+.hero h1 { font-size:clamp(2rem, 5vw, 3.5rem); font-weight:800; line-height:1.1; margin-bottom:1rem; }
+.hero h1 .hi { color:var(--accent); }
+.hero p { color:var(--muted); max-width:560px; margin:0 auto 2rem; font-size:1rem; line-height:1.7; }
+.hero-badges { display:flex; gap:0.75rem; justify-content:center; flex-wrap:wrap; }
+.badge { background:rgba(52,211,153,0.1); border:1px solid rgba(52,211,153,0.3); color:var(--accent3); padding:0.35rem 1rem; border-radius:999px; font-family:var(--mono); font-size:0.7rem; }
+
+/* TABS */
+.tabs { display:flex; gap:0; border-bottom:1px solid var(--border); padding:0 2rem; overflow-x:auto; }
+.tab { padding:1rem 1.5rem; font-family:var(--mono); font-size:0.78rem; color:var(--muted); cursor:pointer; border-bottom:2px solid transparent; white-space:nowrap; transition:all 0.2s; }
+.tab:hover { color:var(--text); }
+.tab.active { color:var(--accent); border-bottom-color:var(--accent); }
+
+/* MAIN CONTENT */
+.page { display:none; padding:2rem; max-width:1200px; margin:0 auto; }
+.page.active { display:block; }
+
+/* LAB CARDS */
+.lab-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(320px, 1fr)); gap:1.5rem; }
+.lab-card {
+  background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden;
+  cursor:pointer; transition:all 0.3s; position:relative;
+}
+.lab-card:hover { border-color:var(--accent); transform:translateY(-2px); box-shadow:0 8px 30px rgba(245,158,11,0.1); }
+.lab-card-header { padding:1.5rem; border-bottom:1px solid var(--border); }
+.lab-num { font-family:var(--mono); font-size:0.7rem; color:var(--accent); letter-spacing:0.1em; margin-bottom:0.5rem; }
+.lab-card h3 { font-size:1rem; font-weight:600; line-height:1.4; margin-bottom:0.75rem; }
+.lab-card p { font-size:0.82rem; color:var(--muted); line-height:1.6; }
+.lab-card-footer { padding:1rem 1.5rem; display:flex; align-items:center; justify-content:space-between; }
+.difficulty { font-family:var(--mono); font-size:0.65rem; padding:0.25rem 0.65rem; border-radius:999px; }
+.diff-easy { background:rgba(52,211,153,0.1); color:var(--accent3); border:1px solid rgba(52,211,153,0.3); }
+.diff-med { background:rgba(245,158,11,0.1); color:var(--accent); border:1px solid rgba(245,158,11,0.3); }
+.diff-hard { background:rgba(248,113,113,0.1); color:var(--danger); border:1px solid rgba(248,113,113,0.3); }
+.sim-btn { background:var(--accent); color:#000; padding:0.4rem 1rem; border-radius:6px; font-family:var(--mono); font-size:0.72rem; font-weight:700; border:none; cursor:pointer; transition:all 0.2s; }
+.sim-btn:hover { background:#fbbf24; transform:scale(1.05); }
+
+/* SIMULATION AREA */
+.sim-area { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.sim-header { padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); display:flex; align-items:center; gap:1rem; }
+.back-btn { background:transparent; border:1px solid var(--border); color:var(--muted); padding:0.4rem 1rem; border-radius:6px; font-family:var(--mono); font-size:0.72rem; cursor:pointer; transition:all 0.2s; }
+.back-btn:hover { border-color:var(--accent2); color:var(--accent2); }
+.sim-title { font-size:1rem; font-weight:700; }
+.sim-subtitle { font-family:var(--mono); font-size:0.72rem; color:var(--accent); }
+.sim-body { display:grid; grid-template-columns:1fr 320px; min-height:520px; }
+.sim-viewport { position:relative; background:#060c18; border-right:1px solid var(--border); overflow:hidden; }
+.sim-controls { padding:1.5rem; display:flex; flex-direction:column; gap:1rem; overflow-y:auto; }
+
+/* CANVAS */
+canvas { display:block; }
+
+/* CONTROLS */
+.ctrl-section { }
+.ctrl-label { font-family:var(--mono); font-size:0.65rem; color:var(--muted); text-transform:uppercase; letter-spacing:0.1em; margin-bottom:0.75rem; }
+.ctrl-group { display:flex; flex-direction:column; gap:0.5rem; }
+.ctrl-btn { background:var(--surface); border:1px solid var(--border); color:var(--text); padding:0.6rem 1rem; border-radius:6px; font-family:var(--mono); font-size:0.72rem; cursor:pointer; transition:all 0.2s; text-align:left; }
+.ctrl-btn:hover { border-color:var(--accent2); color:var(--accent2); background:rgba(56,189,248,0.05); }
+.ctrl-btn.done { border-color:var(--accent3); color:var(--accent3); }
+.ctrl-btn.active { border-color:var(--accent); color:var(--accent); background:rgba(245,158,11,0.08); }
+.ctrl-slider { width:100%; accent-color:var(--accent); cursor:pointer; }
+.ctrl-row { display:flex; align-items:center; justify-content:space-between; gap:0.5rem; font-family:var(--mono); font-size:0.72rem; }
+.ctrl-val { color:var(--accent); min-width:50px; text-align:right; }
+.readout { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:1rem; }
+.readout-row { display:flex; justify-content:space-between; padding:0.3rem 0; border-bottom:1px solid var(--border); font-family:var(--mono); font-size:0.72rem; }
+.readout-row:last-child { border-bottom:none; }
+.readout-key { color:var(--muted); }
+.readout-val { color:var(--accent2); }
+
+/* STATUS LOG */
+.status-log { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:0.75rem; max-height:120px; overflow-y:auto; }
+.log-entry { font-family:var(--mono); font-size:0.68rem; color:var(--muted); padding:0.2rem 0; border-bottom:1px solid rgba(255,255,255,0.03); }
+.log-entry.success { color:var(--accent3); }
+.log-entry.warn { color:var(--accent); }
+.log-entry.info { color:var(--accent2); }
+
+/* STEP GUIDE */
+.step-guide { background:var(--surface); border:1px solid var(--border); border-radius:8px; padding:1rem; }
+.step-item { display:flex; gap:0.75rem; align-items:flex-start; padding:0.5rem 0; border-bottom:1px solid var(--border); }
+.step-item:last-child { border-bottom:none; }
+.step-num { background:var(--border); border-radius:4px; width:22px; height:22px; display:flex; align-items:center; justify-content:center; font-family:var(--mono); font-size:0.65rem; color:var(--muted); flex-shrink:0; }
+.step-num.done-step { background:rgba(52,211,153,0.2); color:var(--accent3); }
+.step-num.active-step { background:rgba(245,158,11,0.2); color:var(--accent); }
+.step-text { font-size:0.78rem; color:var(--muted); line-height:1.5; }
+.step-text.active-step { color:var(--text); }
+
+/* CHEATSHEET */
+.cheat-grid { display:grid; grid-template-columns:repeat(auto-fill, minmax(340px, 1fr)); gap:1.5rem; }
+.cheat-card { background:var(--card); border:1px solid var(--border); border-radius:12px; overflow:hidden; }
+.cheat-card-head { background:linear-gradient(135deg, #1a2235, #0f172a); padding:1.25rem 1.5rem; border-bottom:1px solid var(--border); }
+.cheat-card-head h3 { font-size:0.95rem; font-weight:700; margin-bottom:0.25rem; }
+.cheat-card-head p { font-family:var(--mono); font-size:0.68rem; color:var(--accent); }
+.cheat-body { padding:1.25rem 1.5rem; }
+.qa-item { margin-bottom:1rem; }
+.question { font-family:var(--mono); font-size:0.72rem; color:var(--accent2); margin-bottom:0.35rem; }
+.answer { font-size:0.8rem; color:var(--muted); line-height:1.6; }
+.formula-box { background:var(--bg); border-left:3px solid var(--accent); padding:0.75rem 1rem; border-radius:0 6px 6px 0; font-family:var(--mono); font-size:0.75rem; color:var(--accent3); margin:0.5rem 0; }
+.tag { display:inline-block; background:rgba(245,158,11,0.1); border:1px solid rgba(245,158,11,0.3); color:var(--accent); padding:0.15rem 0.5rem; border-radius:4px; font-family:var(--mono); font-size:0.65rem; margin-right:0.25rem; margin-bottom:0.25rem; }
+
+/* SECTION HEADERS */
+.section-head { margin-bottom:2rem; }
+.section-head h2 { font-size:1.75rem; font-weight:800; margin-bottom:0.5rem; }
+.section-head p { color:var(--muted); font-size:0.9rem; }
+
+/* ANIMATIONS */
+@keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+@keyframes spin { to{transform:rotate(360deg)} }
+.pulse { animation: pulse 2s infinite; }
+
+/* SCROLLBAR */
+::-webkit-scrollbar { width:4px; height:4px; }
+::-webkit-scrollbar-track { background:var(--bg); }
+::-webkit-scrollbar-thumb { background:var(--border); border-radius:2px; }
+
+@media(max-width:768px) {
+  .sim-body { grid-template-columns:1fr; }
+  .sim-viewport { height:300px; }
+  .nav-pills { display:none; }
+}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">SURVEY<span>LAB</span> · NCEC104</div>
+  <div class="nav-pills">
+    <button class="nav-pill active" onclick="showPage('home')">Home</button>
+    <button class="nav-pill" onclick="showPage('labs')">Virtual Labs</button>
+    <button class="nav-pill" onclick="showPage('cheat')">Viva Cheatsheet</button>
+  </div>
+</header>
+
+<!-- HOME PAGE -->
+<div id="page-home" class="page active" style="padding:3rem 2rem; max-width:900px; margin:0 auto;">
+  <div class="hero">
+    <div class="hero-eyebrow">IIT (ISM) Dhanbad · Surveying Lab</div>
+    <h1>Your exam is<br><span class="hi">tomorrow.</span><br>Let's get you ready.</h1>
+    <p>Interactive virtual simulations for all 11 NCEC104 practicals — operate instruments, take readings, and master viva answers tonight.</p>
+    <div class="hero-badges">
+      <span class="badge">⚡ 11 Virtual Simulations</span>
+      <span class="badge">🎯 Viva Cheatsheets</span>
+      <span class="badge">📐 Formula Bank</span>
+      <span class="badge">🔧 Step-by-Step Guides</span>
+    </div>
+  </div>
+  <div style="display:grid; grid-template-columns:repeat(auto-fill,minmax(240px,1fr)); gap:1rem; margin-top:2rem;">
+    <div class="lab-card" onclick="showPage('labs')">
+      <div class="lab-card-header">
+        <div class="lab-num">QUICK START</div>
+        <h3>Virtual Lab Simulations</h3>
+        <p>Operate theodolites, total stations, levels, and GPS units interactively</p>
+      </div>
+      <div class="lab-card-footer">
+        <span class="difficulty diff-easy">11 Labs</span>
+        <button class="sim-btn">Start →</button>
+      </div>
+    </div>
+    <div class="lab-card" onclick="showPage('cheat')">
+      <div class="lab-card-header">
+        <div class="lab-num">EXAM PREP</div>
+        <h3>Viva Q&A Cheatsheet</h3>
+        <p>All critical questions, formulas, and definitions for your practical exam</p>
+      </div>
+      <div class="lab-card-footer">
+        <span class="difficulty diff-easy">50+ Q&A</span>
+        <button class="sim-btn">Study →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- LABS PAGE -->
+<div id="page-labs" class="page" style="padding:2rem; max-width:1200px; margin:0 auto;">
+  <div id="lab-list">
+    <div class="section-head">
+      <h2>Virtual Lab Simulations</h2>
+      <p>Click any lab to launch an interactive simulation</p>
+    </div>
+    <div class="lab-grid">
+      <div class="lab-card" onclick="launchLab('theodolite-setup')">
+        <div class="lab-card-header">
+          <div class="lab-num">EXP 3 & 4 · THEODOLITE</div>
+          <h3>Theodolite Setup & Horizontal Angle Measurement</h3>
+          <p>Practice centering, leveling, eliminating parallax, and measuring angles by repetition method</p>
+        </div>
+        <div class="lab-card-footer"><span class="difficulty diff-med">Core Skill</span><button class="sim-btn">Launch →</button></div>
+      </div>
+      <div class="lab-card" onclick="launchLab('levelling')">
+        <div class="lab-card-header">
+          <div class="lab-num">EXP 6 & 7 · LEVELLING</div>
+          <h3>Differential Levelling (HI & Rise-Fall)</h3>
+          <p>Set up dumpy level, take BS/IS/FS readings, compute RLs, apply arithmetic check</p>
+        </div>
+        <div class="lab-card-footer"><span class="difficulty diff-easy">Calculation Heavy</span><button class="sim-btn">Launch →</button></div>
+      </div>
+      <div class="lab-card" onclick="launchLab('total-station')">
+        <div class="lab-card-header">
+          <div class="lab-num">EXP 8 · TOTAL STATION</div>
+          <h3>Total Station: Distance & Angle Measurement</h3>
+          <p>Setup, orient to north, measure distance & remote elevation using EDM and REM function</p>
+        </div>
+        <div class="lab-card-footer"><span class="difficulty diff-med">High Priority</span><button class="sim-btn">Launch →</button></div>
+      </div>
+      <div class="lab-card" onclick="launchLab('traversing')">
+        <div class="lab-card-header">
+          <div class="lab-num">EXP 9 · TOTAL STATION</div>
+          <h3>Traversing with Total Station</h3>
+          <p>Closed traverse, coordinate measurement, graphical view, 2D surface area calculation</p>
+        </div>
+        <div class="lab-card-footer"><span class="difficulty diff-hard">Advanced</span><button class="sim-btn">Launch →</button></div>
+      </div>
+      <div class="lab-card" onclick="launchLab('curve')">
+        <div class="lab-card-header">
+          <div class="lab-num">EXP 10 · CURVE SETTING</div>
+          <h3>Setting Out Simple Curve (Rankine's Method)</h3>
+          <p>Use Stakeout function, define curve by 3 points, compute arc length, chord, central angle</p>
+        </div>
+        <div class="lab-card-footer"><span class="difficulty diff-hard">Tricky</span><button class="sim-btn">Launch →</button></div>
+      </div>
+      <div class="lab-card" onclick="launchLab('gps')">
+        <div class="lab-card-header">
+          <div class="lab-num">EXP 11 · GPS</div>
+          <h3>GPS Field Data Collection</h3>
+          <p>Trilateration principle, satellite lock, mark waypoints, record lat/lon/elevation</p>
+        </div>
+        <div class="lab-card-footer"><span class="difficulty diff-easy">Conceptual</span><button class="sim-btn">Launch →</button></div>
+      </div>
+    </div>
+  </div>
+  <div id="lab-sim" style="display:none;"></div>
+</div>
+
+<!-- CHEATSHEET PAGE -->
+<div id="page-cheat" class="page" style="padding:2rem; max-width:1200px; margin:0 auto;">
+  <div class="section-head">
+    <h2>Viva Cheatsheet</h2>
+    <p>Critical Q&A, formulas, and definitions — everything your examiner might ask</p>
+  </div>
+  <div class="cheat-grid">
+
+    <div class="cheat-card">
+      <div class="cheat-card-head">
+        <h3>🔭 Theodolite — Parts & Terms</h3>
+        <p>Exp 3, 4, 5 · Most Asked</p>
+      </div>
+      <div class="cheat-body">
+        <div class="qa-item">
+          <div class="question">Q: What is a theodolite?</div>
+          <div class="answer">A precision instrument for measuring horizontal AND vertical angles. Transit theodolite telescope can be rotated 180° in a vertical plane (non-transit cannot).</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: What are the 3 temporary adjustments?</div>
+          <div class="answer">① Setting up (centering over station with plumb bob) ② Leveling up (using foot screws & plate bubble) ③ Elimination of parallax (focus eyepiece then objective)</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: What is transiting / plunging?</div>
+          <div class="answer">Rotating telescope 180° in vertical plane about the trunnion axis. Also called plunging or reversing.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: Repetition vs Reiteration method?</div>
+          <div class="answer"><b>Repetition</b>: Same angle added n times, final reading ÷ n. Eliminates graduation errors. <b>Reiteration</b>: Multiple angles measured from one station, horizon closed (sum = 360°).</div>
+        </div>
+        <div class="formula-box">Horizontal angle = Final reading ÷ No. of repetitions</div>
+        <div class="qa-item">
+          <div class="question">Q: What is Face Left / Face Right?</div>
+          <div class="answer">Face Left: Vertical circle to the LEFT of observer. Face Right: Vertical circle to the RIGHT. Average of both eliminates instrumental errors.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-card-head">
+        <h3>📏 Levelling — Key Concepts</h3>
+        <p>Exp 6 & 7 · Calculation Heavy</p>
+      </div>
+      <div class="cheat-body">
+        <div class="qa-item">
+          <div class="question">Q: What is levelling?</div>
+          <div class="answer">The art of determining relative heights (elevations) of points on Earth's surface. Uses a level instrument and levelling staff.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: Define BS, IS, FS</div>
+          <div class="answer"><b>BS (Back Sight)</b>: First reading after setting up level (on BM). <b>IS (Intermediate Sight)</b>: Any reading between BS and FS. <b>FS (Fore Sight)</b>: Last reading before shifting level.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: HI Method formula?</div>
+        </div>
+        <div class="formula-box">HI = RL of BM + BS<br>RL of point = HI − IS or FS<br>Check: ΣBS − ΣFS = Last RL − First RL</div>
+        <div class="qa-item">
+          <div class="question">Q: Rise & Fall Method?</div>
+        </div>
+        <div class="formula-box">Rise = prev reading > current reading<br>Fall = prev reading &lt; current reading<br>RL = prev RL + Rise (or − Fall)<br>Check: ΣBS−ΣFS = ΣRise−ΣFall = Last RL − First RL</div>
+        <div class="qa-item">
+          <div class="question">Q: What is a Change Point (CP)?</div>
+          <div class="answer">A stable point where both FS and BS are taken. Used when instrument is shifted. Must be on firm ground.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-card-head">
+        <h3>⚡ Total Station — All Functions</h3>
+        <p>Exp 8, 9, 10 · Very Important</p>
+      </div>
+      <div class="cheat-body">
+        <div class="qa-item">
+          <div class="question">Q: What is a Total Station?</div>
+          <div class="answer">An instrument combining EDM (Electronic Distance Measurement) + Electronic Digital Theodolite (EDT). Measures distances, horizontal & vertical angles, coordinates simultaneously.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: Two methods of EDM distance measurement?</div>
+          <div class="answer"><b>Phase Shift Method</b>: Uses continuous EM waves; compares phase of outgoing vs reflected wave. <b>Pulsed Laser Method</b>: Measures time for laser pulse to travel to target and back. D = vt/2</div>
+        </div>
+        <div class="formula-box">2D = v × t (Pulsed laser method)<br>where v = speed of light, t = travel time</div>
+        <div class="qa-item">
+          <div class="question">Q: What does REM function do?</div>
+          <div class="answer">Remote Elevation Measurement — measures height of inaccessible points (e.g. top of building) without placing prism at that point. Set prism at base, focus top.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: Key display symbols?</div>
+          <div class="answer"><span class="tag">HR</span> Horiz angle right <span class="tag">HD</span> Horiz distance <span class="tag">VD</span> Elevation diff <span class="tag">SD</span> Slope distance <span class="tag">N/E/Z</span> Coordinates</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-card-head">
+        <h3>🌀 Curve Setting (Rankine's)</h3>
+        <p>Exp 10 · Concept + Procedure</p>
+      </div>
+      <div class="cheat-body">
+        <div class="qa-item">
+          <div class="question">Q: What is a simple curve?</div>
+          <div class="answer">A circular arc in the horizontal plane with central angle < 180°. Defined by 3 points using radius, chord, and central angle.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: Right face vs Left face curve?</div>
+          <div class="answer"><b>Right face curve</b>: starts left, ends right of start point. <b>Left face curve</b>: starts right, ends left.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: What stakeout inputs are needed?</div>
+          <div class="answer">Either: Radius + Start point, OR Center coordinates, OR Chord length + Rise (mid-ordinate)</div>
+        </div>
+        <div class="formula-box">Arc length L = R × θ (θ in radians)<br>Chord = 2R sin(θ/2)<br>Mid-ordinate m = R(1 − cos θ/2)</div>
+        <div class="qa-item">
+          <div class="question">Q: Procedure using Total Station?</div>
+          <div class="answer">1. Set up TS at P1. 2. Go to Stakeout → Arcs → Key In. 3. Enter method (Two points + radius). 4. Enter start point (BM8), end point (BM9), radius. 5. Press CALC → STORE. 6. Stakeout points along arc.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-card-head">
+        <h3>🛰️ GPS — Principles & Operation</h3>
+        <p>Exp 11 · Conceptual Questions</p>
+      </div>
+      <div class="cheat-body">
+        <div class="qa-item">
+          <div class="question">Q: How does GPS work?</div>
+          <div class="answer">Trilateration — calculates position from distance to ≥4 satellites whose positions are known. 3 satellites for 2D position, 4th satellite to eliminate receiver clock error.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: What is trilateration?</div>
+          <div class="answer">Determining position from known distances (not angles) from reference points. Different from triangulation which uses angles.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: What is absolute vs differential GPS?</div>
+          <div class="answer"><b>Absolute</b>: Single receiver, ±10–20m accuracy. <b>DGPS</b>: Base station + rover, ±1m. <b>RTK</b>: Real-time kinematic, centimeter accuracy.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: Minimum satellites for accuracy?</div>
+          <div class="answer">Minimum 4 satellites for 3D position fix. Our GPS needs signals from 5 satellites for 3m circumference accuracy (per lab manual).</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: How to record a point?</div>
+          <div class="answer">Power ON → wait for satellite lock (5+ satellites) → Go to Mark Waypoint → records Latitude, Longitude, Elevation.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-card-head">
+        <h3>🧭 Traverse & Compass Survey</h3>
+        <p>Exp 2 & 5 · Angle Checks</p>
+      </div>
+      <div class="cheat-body">
+        <div class="qa-item">
+          <div class="question">Q: Open vs Closed traverse?</div>
+          <div class="answer"><b>Closed traverse</b>: ends at starting point. Used for wide areas, lakes, boundaries. <b>Open traverse</b>: doesn't close. Used for roads, railways, canals.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: Check for closed traverse angles?</div>
+        </div>
+        <div class="formula-box">Sum of interior angles = (2n − 4) × 90°<br>Sum of exterior angles = (2n + 4) × 90°<br>where n = number of sides</div>
+        <div class="qa-item">
+          <div class="question">Q: FB and BB relationship?</div>
+        </div>
+        <div class="formula-box">BB = FB ± 180°<br>(+ if FB &lt; 180°, − if FB > 180°)</div>
+        <div class="qa-item">
+          <div class="question">Q: Included angle from compass?</div>
+        </div>
+        <div class="formula-box">Included angle = BB of previous line − FB of next line</div>
+        <div class="qa-item">
+          <div class="question">Q: What is Gale's Traverse Table?</div>
+          <div class="answer">Standard tabular format for traverse computation: columns for station, line, length, bearing, quadrant, consecutive coordinates (Latitude N/S, Departure E/W), corrections, independent coordinates.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-card-head">
+        <h3>📐 Chain Survey & Instruments</h3>
+        <p>Exp 1 · Basic Concepts</p>
+      </div>
+      <div class="cheat-body">
+        <div class="qa-item">
+          <div class="question">Q: Principle of chain surveying?</div>
+          <div class="answer">Only linear measurements are taken. Area divided into triangles (simplest figure plottable from 3 side lengths without knowing angles).</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: Types of chains?</div>
+          <div class="answer"><span class="tag">Metric</span> 20m, 100 links <span class="tag">Gunter's</span> 66ft, 100 links <span class="tag">Engineer's</span> 100ft, 100 links <span class="tag">Revenue</span> 33ft, 16 links</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: Types of offsets?</div>
+          <div class="answer"><b>Perpendicular offsets</b>: Right angle to chain line (more accurate). <b>Oblique offsets / Tie lines</b>: At other angles, used for distant points.</div>
+        </div>
+        <div class="qa-item">
+          <div class="question">Q: What is ranging?</div>
+          <div class="answer">Establishing intermediate points on a survey line so all points are in alignment. Done by two surveyors using ranging rods and code of signals.</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="cheat-card">
+      <div class="cheat-card-head">
+        <h3>🔑 Quick Formula Bank</h3>
+        <p>All Labs · Must Memorize</p>
+      </div>
+      <div class="cheat-body">
+        <div class="formula-box">Height of object: h = D tan α<br>RL of top = RL of BM + S + h</div>
+        <div class="formula-box">Arithmetic check (both methods):<br>ΣBS − ΣFS = Last RL − First RL</div>
+        <div class="formula-box">Traverse angle check:<br>Interior = (2n−4)×90° | Exterior = (2n+4)×90°</div>
+        <div class="formula-box">Simple curve:<br>Arc L = Rθ | Chord = 2R sin(θ/2)<br>Mid-ordinate = R(1 − cos θ/2)</div>
+        <div class="formula-box">GPS trilateration:<br>Min 3 satellites for 2D fix<br>Min 4 satellites for 3D fix</div>
+        <div class="formula-box">EDM (pulse method):<br>D = vt/2 (v = 3×10⁸ m/s)</div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+// ─── PAGE NAVIGATION ───────────────────────────────────────────
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-pill').forEach(p => p.classList.remove('active'));
+  document.getElementById('page-' + id).classList.add('active');
+  const pills = document.querySelectorAll('.nav-pill');
+  const map = {home:0, labs:1, cheat:2};
+  if (map[id] !== undefined) pills[map[id]].classList.add('active');
+  if (id === 'labs') { document.getElementById('lab-list').style.display = ''; document.getElementById('lab-sim').style.display = 'none'; }
+}
+
+// ─── LAB LAUNCHER ──────────────────────────────────────────────
+function launchLab(id) {
+  document.getElementById('lab-list').style.display = 'none';
+  const simEl = document.getElementById('lab-sim');
+  simEl.style.display = '';
+  simEl.innerHTML = '';
+  const sims = {
+    'theodolite-setup': buildTheodoliteSim,
+    'levelling': buildLevellingSim,
+    'total-station': buildTotalStationSim,
+    'traversing': buildTraversingSim,
+    'curve': buildCurveSim,
+    'gps': buildGPSSim
+  };
+  if (sims[id]) sims[id](simEl);
+}
+
+function backToList() {
+  document.getElementById('lab-list').style.display = '';
+  document.getElementById('lab-sim').style.display = 'none';
+}
+
+// ─── HELPER ────────────────────────────────────────────────────
+function mkSimShell(container, title, subtitle, controlsHTML, canvasId) {
+  container.innerHTML = `
+  <div class="sim-area">
+    <div class="sim-header">
+      <button class="back-btn" onclick="backToList()">← All Labs</button>
+      <div>
+        <div class="sim-title">${title}</div>
+        <div class="sim-subtitle">${subtitle}</div>
+      </div>
+    </div>
+    <div class="sim-body">
+      <div class="sim-viewport" id="viewport-${canvasId}">
+        <canvas id="${canvasId}"></canvas>
+      </div>
+      <div class="sim-controls">${controlsHTML}</div>
+    </div>
+  </div>`;
+  const vp = document.getElementById('viewport-' + canvasId);
+  const canvas = document.getElementById(canvasId);
+  const resize = () => { canvas.width = vp.clientWidth; canvas.height = vp.clientHeight; };
+  resize();
+  window.addEventListener('resize', resize);
+  return canvas;
+}
+
+function addLog(logId, msg, type='') {
+  const log = document.getElementById(logId);
+  if (!log) return;
+  const d = document.createElement('div');
+  d.className = 'log-entry ' + type;
+  d.textContent = '> ' + msg;
+  log.prepend(d);
+  if (log.children.length > 12) log.removeChild(log.lastChild);
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIM 1: THEODOLITE
+// ═══════════════════════════════════════════════════════════════
+function buildTheodoliteSim(container) {
+  const controls = `
+    <div class="ctrl-section">
+      <div class="ctrl-label">Step-by-Step Procedure</div>
+      <div class="step-guide" id="theo-steps">
+        <div class="step-item" id="ts1"><span class="step-num active-step" id="sn1">1</span><span class="step-text active-step">Set up tripod over station</span></div>
+        <div class="step-item" id="ts2"><span class="step-num" id="sn2">2</span><span class="step-text">Attach instrument, center roughly</span></div>
+        <div class="step-item" id="ts3"><span class="step-num" id="sn3">3</span><span class="step-text">Level with foot screws (plate bubble)</span></div>
+        <div class="step-item" id="ts4"><span class="step-num" id="sn4">4</span><span class="step-text">Center with optical plummet</span></div>
+        <div class="step-item" id="ts5"><span class="step-num" id="sn5">5</span><span class="step-text">Eliminate parallax (focus eyepiece + objective)</span></div>
+        <div class="step-item" id="ts6"><span class="step-num" id="sn6">6</span><span class="step-text">Set 0° on vernier A, sight station P</span></div>
+        <div class="step-item" id="ts7"><span class="step-num" id="sn7">7</span><span class="step-text">Rotate to station Q, read angle (Face Left)</span></div>
+        <div class="step-item" id="ts8"><span class="step-num" id="sn8">8</span><span class="step-text">Change face, repeat (Face Right)</span></div>
+        <div class="step-item" id="ts9"><span class="step-num" id="sn9">9</span><span class="step-text">Average FL & FR readings → Final angle</span></div>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Controls</div>
+      <div class="ctrl-group">
+        <button class="ctrl-btn" id="tbtn1" onclick="theoStep(1)">① Setup Tripod</button>
+        <button class="ctrl-btn" id="tbtn2" onclick="theoStep(2)">② Attach & Rough Level</button>
+        <button class="ctrl-btn" id="tbtn3" onclick="theoStep(3)">③ Precise Level (Foot Screws)</button>
+        <button class="ctrl-btn" id="tbtn4" onclick="theoStep(4)">④ Center (Optical Plummet)</button>
+        <button class="ctrl-btn" id="tbtn5" onclick="theoStep(5)">⑤ Eliminate Parallax</button>
+        <button class="ctrl-btn" id="tbtn6" onclick="theoStep(6)">⑥ Zero Vernier, Sight P</button>
+        <button class="ctrl-btn" id="tbtn7" onclick="theoStep(7)">⑦ Rotate to Q (Face Left)</button>
+        <button class="ctrl-btn" id="tbtn8" onclick="theoStep(8)">⑧ Change Face, Repeat</button>
+        <button class="ctrl-btn" id="tbtn9" onclick="theoStep(9)">⑨ Calculate Average</button>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Rotate Telescope</div>
+      <div class="ctrl-row">
+        <span>Horizontal Angle</span>
+        <span class="ctrl-val" id="ha-val">0°</span>
+      </div>
+      <input type="range" class="ctrl-slider" min="0" max="359" value="0" id="ha-slider" oninput="rotateTheo(this.value)">
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Instrument Readings</div>
+      <div class="readout">
+        <div class="readout-row"><span class="readout-key">Vernier A</span><span class="readout-val" id="read-a">0°00'00"</span></div>
+        <div class="readout-row"><span class="readout-key">Vernier B</span><span class="readout-val" id="read-b">180°00'00"</span></div>
+        <div class="readout-row"><span class="readout-key">Angle POQ (FL)</span><span class="readout-val" id="read-fl">—</span></div>
+        <div class="readout-row"><span class="readout-key">Angle POQ (FR)</span><span class="readout-val" id="read-fr">—</span></div>
+        <div class="readout-row"><span class="readout-key">Average Angle</span><span class="readout-val" id="read-avg" style="color:var(--accent3)">—</span></div>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Log</div>
+      <div class="status-log" id="theo-log"></div>
+    </div>`;
+  
+  const canvas = mkSimShell(container, 'Theodolite — Horizontal Angle Measurement', 'Exp 3 & 4 · Repetition Method', controls, 'theo-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  let state = { step: 0, ha: 0, tripodDown: false, leveled: false, centered: false, parallaxOk: false, zeroed: false, fl: null, fr: null };
+  
+  window.theoState = state;
+  window.theoCtx = ctx;
+  
+  function draw() {
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    
+    // Ground
+    ctx.fillStyle = '#0d1a2e';
+    ctx.fillRect(0, 0, w, h);
+    
+    // Grid
+    ctx.strokeStyle = 'rgba(56,189,248,0.04)';
+    for (let x = 0; x < w; x += 40) { ctx.beginPath(); ctx.moveTo(x,0); ctx.lineTo(x,h); ctx.stroke(); }
+    for (let y = 0; y < h; y += 40) { ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke(); }
+    
+    const cx = w/2, cy = h * 0.55;
+    
+    // Station P and Q
+    const pAngle = 210 * Math.PI/180;
+    const qAngle = (210 + state.ha) * Math.PI/180;
+    const dist = Math.min(w, h) * 0.38;
+    
+    const px = cx + Math.cos(pAngle) * dist;
+    const py = cy + Math.sin(pAngle) * dist;
+    const qx = cx + Math.cos(qAngle) * dist;
+    const qy = cy + Math.sin(qAngle) * dist;
+    
+    // Line of sight to P
+    if (state.zeroed) {
+      ctx.strokeStyle = 'rgba(52,211,153,0.5)';
+      ctx.lineWidth = 1;
+      ctx.setLineDash([5,5]);
+      ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(px,py); ctx.stroke();
+      ctx.setLineDash([]);
+    }
+    // Line of sight to Q
+    ctx.strokeStyle = 'rgba(245,158,11,0.7)';
+    ctx.lineWidth = 1.5;
+    ctx.setLineDash([4,4]);
+    ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(qx,qy); ctx.stroke();
+    ctx.setLineDash([]);
+    
+    // Angle arc
+    if (state.ha > 5) {
+      ctx.strokeStyle = 'rgba(245,158,11,0.4)';
+      ctx.lineWidth = 2;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 60, pAngle - Math.PI*2, qAngle);
+      ctx.stroke();
+      
+      const midA = pAngle + (qAngle - pAngle) / 2;
+      ctx.fillStyle = 'var(--accent)';
+      ctx.font = '11px Space Mono';
+      ctx.textAlign = 'center';
+      ctx.fillText(state.ha + '°', cx + Math.cos(midA) * 80, cy + Math.sin(midA) * 80);
+    }
+    
+    // Stations
+    [[px,py,'P','#34d399'],[qx,qy,'Q','#f59e0b']].forEach(([x,y,label,col]) => {
+      ctx.beginPath(); ctx.arc(x,y,8,0,Math.PI*2);
+      ctx.fillStyle = col + '33'; ctx.fill();
+      ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = col; ctx.font = 'bold 13px Syne'; ctx.textAlign = 'center';
+      ctx.fillText(label, x, y - 15);
+    });
+    
+    // Instrument at center
+    drawInstrument(ctx, cx, cy, state);
+    
+    // Labels
+    ctx.fillStyle = 'rgba(100,116,139,0.7)';
+    ctx.font = '11px Space Mono';
+    ctx.textAlign = 'left';
+    ctx.fillText('Station O (Instrument)', cx + 20, cy - 50);
+  }
+  
+  function drawInstrument(ctx, cx, cy, s) {
+    // Tripod legs
+    if (s.tripodDown) {
+      ctx.strokeStyle = s.leveled ? '#38bdf8' : '#64748b';
+      ctx.lineWidth = 3;
+      [[-30, 40],[30, 40],[0, 50]].forEach(([dx,dy]) => {
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(cx+dx, cy+dy); ctx.stroke();
+      });
+    }
+    // Body
+    const col = s.leveled ? '#38bdf8' : (s.tripodDown ? '#f59e0b' : '#475569');
+    ctx.beginPath(); ctx.arc(cx, cy, 14, 0, Math.PI*2);
+    ctx.fillStyle = col + '33'; ctx.fill();
+    ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.stroke();
+    
+    // Telescope
+    const rad = s.ha * Math.PI / 180;
+    ctx.strokeStyle = s.parallaxOk ? '#f59e0b' : '#64748b';
+    ctx.lineWidth = 4;
+    ctx.lineCap = 'round';
+    ctx.beginPath();
+    ctx.moveTo(cx - Math.cos(rad + Math.PI)*18, cy - Math.sin(rad + Math.PI)*18);
+    ctx.lineTo(cx + Math.cos(rad)*25, cy + Math.sin(rad)*25);
+    ctx.stroke();
+    
+    // Bubble (leveled indicator)
+    if (s.leveled) {
+      ctx.beginPath(); ctx.arc(cx, cy, 5, 0, Math.PI*2);
+      ctx.fillStyle = '#34d399'; ctx.fill();
+    }
+  }
+  
+  window.rotateTheo = function(val) {
+    state.ha = parseInt(val);
+    document.getElementById('ha-val').textContent = val + '°';
+    const a = parseInt(val);
+    const b = (a + 180) % 360;
+    document.getElementById('read-a').textContent = fmtAngle(a);
+    document.getElementById('read-b').textContent = fmtAngle(b);
+    draw();
+  };
+  
+  window.theoStep = function(n) {
+    if (n > state.step + 1) { addLog('theo-log', 'Complete previous steps first!', 'warn'); return; }
+    state.step = n;
+    // Update step markers
+    for (let i = 1; i <= 9; i++) {
+      const sn = document.getElementById('sn'+i);
+      const st = document.getElementById('ts'+i);
+      if (i < n) { sn.className = 'step-num done-step'; sn.textContent = '✓'; }
+      else if (i === n) { sn.className = 'step-num active-step'; sn.textContent = i; st.querySelector('.step-text').classList.add('active-step'); }
+      else { sn.className = 'step-num'; sn.textContent = i; }
+      document.getElementById('tbtn'+i).className = i < n ? 'ctrl-btn done' : i === n ? 'ctrl-btn active' : 'ctrl-btn';
+    }
+    
+    const msgs = ['','Tripod set up over station O ✓','Instrument attached and roughly leveled','Precise leveling done — bubble centered in plate vial','Centering complete — plummet centered on station mark','Parallax eliminated — cross-hairs sharp and clear','Vernier A set to 0°, telescope bisecting station P','Face Left reading recorded: ' + fmtAngle(state.ha),'Face Right — changed face, telescope rotated 180°','Average angle = ' + fmtAngle(state.ha) + ' ✓ (Mean of FL & FR)'];
+    
+    if (n === 1) state.tripodDown = true;
+    if (n === 3) state.leveled = true;
+    if (n === 4) state.centered = true;
+    if (n === 5) state.parallaxOk = true;
+    if (n === 6) state.zeroed = true;
+    if (n === 7) { state.fl = state.ha; document.getElementById('read-fl').textContent = fmtAngle(state.ha); }
+    if (n === 8) { state.fr = state.ha; document.getElementById('read-fr').textContent = fmtAngle(state.ha); }
+    if (n === 9 && state.fl !== null && state.fr !== null) {
+      const avg = (state.fl + state.fr) / 2;
+      document.getElementById('read-avg').textContent = fmtAngle(avg);
+    }
+    
+    addLog('theo-log', msgs[n], n === 9 ? 'success' : 'info');
+    draw();
+  };
+  
+  draw();
+  addLog('theo-log', 'Click Step 1 to begin', 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIM 2: LEVELLING
+// ═══════════════════════════════════════════════════════════════
+function buildLevellingSim(container) {
+  const controls = `
+    <div class="ctrl-section">
+      <div class="ctrl-label">Field Readings Input</div>
+      <div class="readout">
+        <div class="readout-row"><span class="readout-key">BM RL</span><span class="readout-val">100.000 m</span></div>
+        <div class="readout-row"><span class="readout-key">BS (BM)</span><span class="readout-val">1.455 m</span></div>
+        <div class="readout-row"><span class="readout-key">IS (Pt 2)</span><span class="readout-val">1.840 m</span></div>
+        <div class="readout-row"><span class="readout-key">IS (Pt 3)</span><span class="readout-val">0.965 m</span></div>
+        <div class="readout-row"><span class="readout-key">FS (Pt 4)</span><span class="readout-val">2.210 m</span></div>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Method</div>
+      <div class="ctrl-group">
+        <button class="ctrl-btn active" id="m-hi" onclick="setMethod('hi')">Height of Instrument Method</button>
+        <button class="ctrl-btn" id="m-rf" onclick="setMethod('rf')">Rise & Fall Method</button>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Level Actions</div>
+      <div class="ctrl-group">
+        <button class="ctrl-btn" onclick="levelSetup()">① Setup Level at O1</button>
+        <button class="ctrl-btn" onclick="takeBS()">② Take BS on BM</button>
+        <button class="ctrl-btn" onclick="takeIS()">③ Take IS readings</button>
+        <button class="ctrl-btn" onclick="takeFS()">④ Take FS, Shift Level</button>
+        <button class="ctrl-btn" onclick="calcRL()">⑤ Calculate RLs</button>
+        <button class="ctrl-btn" onclick="arithCheck()">⑥ Arithmetic Check</button>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Calculation Results</div>
+      <div class="readout" id="level-results">
+        <div class="readout-row"><span class="readout-key">H.I.</span><span class="readout-val" id="hi-val">—</span></div>
+        <div class="readout-row"><span class="readout-key">RL of Pt 2</span><span class="readout-val" id="rl2">—</span></div>
+        <div class="readout-row"><span class="readout-key">RL of Pt 3</span><span class="readout-val" id="rl3">—</span></div>
+        <div class="readout-row"><span class="readout-key">RL of Pt 4</span><span class="readout-val" id="rl4">—</span></div>
+        <div class="readout-row"><span class="readout-key">Check ΣBS−ΣFS</span><span class="readout-val" id="check-val">—</span></div>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Log</div>
+      <div class="status-log" id="level-log"></div>
+    </div>`;
+  
+  const canvas = mkSimShell(container, 'Differential Levelling', 'Exp 6 & 7 · HI Method & Rise-Fall Method', controls, 'level-canvas');
+  const ctx = canvas.getContext('2d');
+  let method = 'hi', levelState = {setup:false, bs:false, is:false, fs:false};
+  
+  // Data
+  const pts = [{name:'BM', rl:100, staff:1.455, type:'BS'}, {name:'Pt2', staff:1.840, type:'IS'}, {name:'Pt3', staff:0.965, type:'IS'}, {name:'Pt4', staff:2.210, type:'FS'}];
+  
+  function draw(highlight = -1) {
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0, 0, w, h);
+    ctx.fillStyle = '#060c18'; ctx.fillRect(0, 0, w, h);
+    
+    // Ground line
+    const gy = h * 0.72;
+    ctx.strokeStyle = '#2a3a55'; ctx.lineWidth = 2;
+    ctx.beginPath(); ctx.moveTo(20, gy); ctx.lineTo(w-20, gy); ctx.stroke();
+    
+    // Terrain bumps
+    ctx.strokeStyle = '#1e3a5f';
+    ctx.beginPath();
+    ctx.moveTo(20, gy);
+    const elevs = [0, -8, 12, -20]; // height offsets
+    const n = pts.length;
+    pts.forEach((p, i) => {
+      const x = 80 + i * (w - 160) / (n - 1);
+      const elev = gy - 20 - elevs[i];
+      ctx.lineTo(x, elev);
+    });
+    ctx.lineTo(w-20, gy);
+    ctx.closePath();
+    ctx.fillStyle = 'rgba(30,58,95,0.3)'; ctx.fill();
+    ctx.stroke();
+    
+    // Level instrument
+    if (levelState.setup) {
+      const lx = w * 0.3, ly = gy - 35;
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(lx-40, ly+30); ctx.lineTo(lx,ly); ctx.lineTo(lx+40,ly+30); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(lx-15, ly); ctx.lineTo(lx+15, ly); ctx.stroke();
+      ctx.fillStyle = '#38bdf8'; ctx.font = '10px Space Mono'; ctx.textAlign = 'center';
+      ctx.fillText('LEVEL', lx, ly - 10);
+      
+      // Line of sight
+      ctx.strokeStyle = 'rgba(56,189,248,0.3)'; ctx.lineWidth = 1;
+      ctx.setLineDash([4,4]);
+      ctx.beginPath(); ctx.moveTo(20, ly); ctx.lineTo(w-20, ly); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = 'rgba(56,189,248,0.5)'; ctx.font = '9px Space Mono'; ctx.textAlign = 'left';
+      ctx.fillText('Line of Sight (HI = ' + (levelState.bs ? '101.455' : '?') + ' m)', 20, ly - 5);
+    }
+    
+    // Staffs and points
+    pts.forEach((p, i) => {
+      const x = 80 + i * (w - 160) / (n - 1);
+      const groundY = gy - 20 - elevs[i];
+      const isHighlight = i === highlight;
+      
+      // Staff
+      const staffH = 60;
+      ctx.strokeStyle = isHighlight ? '#f59e0b' : '#475569'; ctx.lineWidth = 3;
+      ctx.beginPath(); ctx.moveTo(x, groundY); ctx.lineTo(x, groundY - staffH); ctx.stroke();
+      
+      // Staff markings
+      for (let m = 0; m <= 4; m++) {
+        ctx.strokeStyle = 'rgba(100,116,139,0.5)'; ctx.lineWidth = 1;
+        ctx.beginPath(); ctx.moveTo(x-5, groundY - m*15); ctx.lineTo(x+5, groundY-m*15); ctx.stroke();
+      }
+      
+      // Reading indicator
+      if (levelState.bs || levelState.is) {
+        const readY = groundY - staffH * 0.5;
+        ctx.strokeStyle = isHighlight ? '#f59e0b' : '#34d399'; ctx.lineWidth = 1.5;
+        ctx.beginPath(); ctx.moveTo(x-8, readY); ctx.lineTo(x+8, readY); ctx.stroke();
+        ctx.fillStyle = isHighlight ? '#f59e0b' : '#34d399';
+        ctx.font = '9px Space Mono'; ctx.textAlign = 'left';
+        ctx.fillText(p.staff + 'm', x + 10, readY + 3);
+      }
+      
+      // Point label
+      const col = {BS:'#38bdf8', IS:'#34d399', FS:'#f87171'}[p.type];
+      ctx.fillStyle = col;
+      ctx.font = 'bold 11px Syne'; ctx.textAlign = 'center';
+      ctx.fillText(p.name, x, groundY + 15);
+      ctx.fillStyle = col + '88';
+      ctx.font = '9px Space Mono'; ctx.textAlign = 'center';
+      ctx.fillText(p.type, x, groundY + 26);
+    });
+  }
+  
+  window.setMethod = function(m) {
+    method = m;
+    document.getElementById('m-hi').className = m === 'hi' ? 'ctrl-btn active' : 'ctrl-btn';
+    document.getElementById('m-rf').className = m === 'rf' ? 'ctrl-btn active' : 'ctrl-btn';
+    addLog('level-log', 'Switched to ' + (m === 'hi' ? 'HI Method' : 'Rise & Fall Method'), 'info');
+  };
+  
+  window.levelSetup = function() { levelState.setup = true; draw(); addLog('level-log', 'Level set up at O1, temporary adjustments done', 'info'); };
+  window.takeBS = function() { if (!levelState.setup) { addLog('level-log','Setup level first!','warn'); return; } levelState.bs = true; draw(0); addLog('level-log', 'BS = 1.455 m on BM (RL=100.000)', 'success'); };
+  window.takeIS = function() { levelState.is = true; draw(1); addLog('level-log', 'IS readings: Pt2=1.840m, Pt3=0.965m', 'success'); };
+  window.takeFS = function() { levelState.fs = true; draw(3); addLog('level-log', 'FS = 2.210 m on Pt4 — ready to shift', 'success'); };
+  
+  window.calcRL = function() {
+    const bmRL = 100.0, bs = 1.455, is2 = 1.840, is3 = 0.965, fs = 2.210;
+    if (method === 'hi') {
+      const hi = bmRL + bs;
+      const rl2 = hi - is2, rl3 = hi - is3, rl4 = hi - fs;
+      document.getElementById('hi-val').textContent = hi.toFixed(3) + ' m';
+      document.getElementById('rl2').textContent = rl2.toFixed(3) + ' m';
+      document.getElementById('rl3').textContent = rl3.toFixed(3) + ' m';
+      document.getElementById('rl4').textContent = rl4.toFixed(3) + ' m';
+      addLog('level-log', `HI=${hi.toFixed(3)}, RL2=${rl2.toFixed(3)}, RL3=${rl3.toFixed(3)}, RL4=${rl4.toFixed(3)}`, 'success');
+    } else {
+      // Rise & Fall
+      const r12 = bs - is2, r23 = is2 - is3, r34 = is3 - fs;
+      const rl2 = bmRL + r12, rl3 = rl2 + r23, rl4 = rl3 + r34;
+      document.getElementById('hi-val').textContent = (r12>0?'Rise':'Fall') + ' ' + Math.abs(r12).toFixed(3);
+      document.getElementById('rl2').textContent = rl2.toFixed(3) + ' m';
+      document.getElementById('rl3').textContent = rl3.toFixed(3) + ' m';
+      document.getElementById('rl4').textContent = rl4.toFixed(3) + ' m';
+      addLog('level-log', `RF: RL2=${rl2.toFixed(3)}, RL3=${rl3.toFixed(3)}, RL4=${rl4.toFixed(3)}`, 'success');
+    }
+    draw();
+  };
+  
+  window.arithCheck = function() {
+    const diff = (1.455 - 2.210).toFixed(3);
+    const rlDiff = ((100 + 1.455 - 1.840 + 1.840 - 0.965 + 0.965 - 2.210) - 100).toFixed(3);
+    document.getElementById('check-val').textContent = diff + ' m';
+    addLog('level-log', `ΣBS−ΣFS = ${diff} = Last RL − First RL = ${diff} ✓ Check PASSED`, 'success');
+  };
+  
+  draw();
+  addLog('level-log', 'Click Step 1 to begin levelling', 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIM 3: TOTAL STATION
+// ═══════════════════════════════════════════════════════════════
+function buildTotalStationSim(container) {
+  const controls = `
+    <div class="ctrl-section">
+      <div class="ctrl-label">Total Station Functions</div>
+      <div class="ctrl-group">
+        <button class="ctrl-btn" onclick="tsFunc('setup')">① Setup & Power ON</button>
+        <button class="ctrl-btn" onclick="tsFunc('job')">② Create Job (File Mgmt)</button>
+        <button class="ctrl-btn" onclick="tsFunc('orient')">③ Orient to Magnetic North</button>
+        <button class="ctrl-btn" onclick="tsFunc('dist')">④ Measure Distance</button>
+        <button class="ctrl-btn" onclick="tsFunc('angle')">⑤ Measure Horizontal Angle</button>
+        <button class="ctrl-btn" onclick="tsFunc('rem')">⑥ REM — Remote Elevation</button>
+        <button class="ctrl-btn" onclick="tsFunc('coord')">⑦ Store Coordinates</button>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Target</div>
+      <div class="ctrl-row">
+        <span>H. Angle to Target</span>
+        <span class="ctrl-val" id="ts-ha">45°</span>
+      </div>
+      <input type="range" class="ctrl-slider" min="0" max="359" value="45" id="ts-ha-slider" oninput="tsMoveTarget(this.value)">
+      <div class="ctrl-row" style="margin-top:0.5rem;">
+        <span>Vertical Angle</span>
+        <span class="ctrl-val" id="ts-va">87°</span>
+      </div>
+      <input type="range" class="ctrl-slider" min="60" max="120" value="87" id="ts-va-slider" oninput="tsMoveVert(this.value)">
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">TS Display</div>
+      <div class="readout">
+        <div class="readout-row"><span class="readout-key">HR (Horiz Angle)</span><span class="readout-val" id="ts-HR">45°00'00"</span></div>
+        <div class="readout-row"><span class="readout-key">V (Vert Angle)</span><span class="readout-val" id="ts-V">87°00'00"</span></div>
+        <div class="readout-row"><span class="readout-key">SD (Slope Dist)</span><span class="readout-val" id="ts-SD">—</span></div>
+        <div class="readout-row"><span class="readout-key">HD (Horiz Dist)</span><span class="readout-val" id="ts-HD">—</span></div>
+        <div class="readout-row"><span class="readout-key">VD (Elev Diff)</span><span class="readout-val" id="ts-VD">—</span></div>
+        <div class="readout-row"><span class="readout-key">N</span><span class="readout-val" id="ts-N">—</span></div>
+        <div class="readout-row"><span class="readout-key">E</span><span class="readout-val" id="ts-E">—</span></div>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Log</div>
+      <div class="status-log" id="ts-log"></div>
+    </div>`;
+  
+  const canvas = mkSimShell(container, 'Total Station — Distance & Angle', 'Exp 8 · EDM + REM Function', controls, 'ts-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  let tsState = {ha:45, va:87, powered:false, jobCreated:false, oriented:false, measured:false};
+  
+  function draw() {
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = '#060c18'; ctx.fillRect(0,0,w,h);
+    
+    // Grid
+    ctx.strokeStyle = 'rgba(56,189,248,0.03)';
+    for (let x=0;x<w;x+=40){ctx.beginPath();ctx.moveTo(x,0);ctx.lineTo(x,h);ctx.stroke();}
+    for (let y=0;y<h;y+=40){ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke();}
+    
+    const cx = w*0.4, cy = h*0.6;
+    
+    // Building (for REM)
+    const bx = cx + 200, by = cy;
+    ctx.fillStyle = 'rgba(30,58,95,0.5)';
+    ctx.fillRect(bx-20, by-120, 40, 120);
+    ctx.fillStyle = 'rgba(56,189,248,0.3)';
+    ctx.fillRect(bx-18, by-115, 8, 10); ctx.fillRect(bx-18, by-95, 8, 10);
+    ctx.fillRect(bx+5, by-115, 8, 10); ctx.fillRect(bx+5, by-95, 8, 10);
+    ctx.fillStyle = '#64748b'; ctx.font = '9px Space Mono'; ctx.textAlign = 'center';
+    ctx.fillText('TARGET', bx, by-130);
+    
+    // North arrow
+    if (tsState.oriented) {
+      ctx.strokeStyle = '#34d399'; ctx.fillStyle = '#34d399';
+      ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(30,30); ctx.lineTo(30,60); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(25,40); ctx.lineTo(30,30); ctx.lineTo(35,40); ctx.closePath(); ctx.fill();
+      ctx.font = 'bold 10px Space Mono'; ctx.textAlign = 'center';
+      ctx.fillText('N', 30, 22);
+    }
+    
+    // Total Station body
+    if (tsState.powered) {
+      // Tripod
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
+      [[cx-25,cy+30],[cx+25,cy+30],[cx,cy+40]].forEach(([x,y])=>{
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(x,y); ctx.stroke();
+      });
+      // Body
+      ctx.fillStyle = 'rgba(56,189,248,0.2)'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx,cy,16,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      
+      // Telescope pointing at target
+      const rad = tsState.ha * Math.PI/180;
+      const tLen = 30;
+      ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3; ctx.lineCap = 'round';
+      ctx.beginPath();
+      ctx.moveTo(cx-Math.cos(rad)*15, cy-Math.sin(rad)*15);
+      ctx.lineTo(cx+Math.cos(rad)*tLen, cy+Math.sin(rad)*tLen);
+      ctx.stroke();
+      
+      // Laser beam to target
+      if (tsState.measured) {
+        ctx.strokeStyle = 'rgba(245,158,11,0.4)'; ctx.lineWidth = 1;
+        ctx.setLineDash([3,3]);
+        ctx.beginPath(); ctx.moveTo(cx,cy); ctx.lineTo(bx,by-60); ctx.stroke();
+        ctx.setLineDash([]);
+        // Prism at building base
+        ctx.fillStyle = '#f59e0b';
+        ctx.beginPath(); ctx.arc(bx,by-10,6,0,Math.PI*2); ctx.fill();
+        ctx.fillStyle = '#f59e0b'; ctx.font = '9px Space Mono'; ctx.textAlign = 'center';
+        ctx.fillText('Prism', bx, by+5);
+      }
+    } else {
+      // Grayed out
+      ctx.fillStyle = 'rgba(71,85,105,0.3)'; ctx.strokeStyle = '#475569'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.arc(cx,cy,16,0,Math.PI*2); ctx.fill(); ctx.stroke();
+      ctx.fillStyle = '#475569'; ctx.font = '11px Syne'; ctx.textAlign = 'center';
+      ctx.fillText('POWER OFF', cx, cy+35);
+    }
+    
+    // Display panel (mini)
+    if (tsState.powered) {
+      ctx.fillStyle = 'rgba(10,20,40,0.9)'; ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1;
+      ctx.fillRect(20, h-100, 160, 90); ctx.strokeRect(20, h-100, 160, 90);
+      ctx.fillStyle = '#38bdf8'; ctx.font = '8px Space Mono'; ctx.textAlign = 'left';
+      const lines = [
+        `HR: ${fmtAngle(tsState.ha)}`,
+        `V : ${fmtAngle(tsState.va)}`,
+        `SD: ${tsState.measured ? '52.340m' : '---'}`,
+        `HD: ${tsState.measured ? '52.120m' : '---'}`,
+        `VD: ${tsState.measured ? '+1.920m' : '---'}`,
+      ];
+      lines.forEach((l,i) => ctx.fillText(l, 28, h-88+i*16));
+    }
+  }
+  
+  window.tsMoveTarget = function(v) {
+    tsState.ha = parseInt(v);
+    document.getElementById('ts-ha').textContent = v + '°';
+    document.getElementById('ts-HR').textContent = fmtAngle(parseInt(v));
+    draw();
+  };
+  window.tsMoveVert = function(v) {
+    tsState.va = parseInt(v);
+    document.getElementById('ts-va').textContent = v + '°';
+    document.getElementById('ts-V').textContent = fmtAngle(parseInt(v));
+    draw();
+  };
+  
+  const msgs = {
+    setup: ['Total Station powered ON. Tripod set, instrument attached and leveled.', 'info'],
+    job: ['Job created: MODE B → S Func → File Mgmt → Create Job → "SURVEY_01" → Accept', 'info'],
+    orient: ['Compass oriented to Magnetic North. HA set to 0° (North). F3 pressed to SET ZERO.', 'success'],
+    dist: ['EDM measuring... SD=52.340m HD=52.120m VD=+1.920m (Press MEAS/SAVE)', 'success'],
+    angle: ['Horizontal angle to target: ' + fmtAngle(tsState.ha) + '. Stored.', 'success'],
+    rem: ['REM function: Focus prism at base → MEAS → Focus top of target → Height = 10.500m displayed', 'success'],
+    coord: ['Coordinates stored: N=1000.524, E=1037.823, Z=102.450m. Point saved to job.', 'success']
+  };
+  
+  window.tsFunc = function(f) {
+    if (f === 'setup') tsState.powered = true;
+    if (f === 'job') tsState.jobCreated = true;
+    if (f === 'orient') tsState.oriented = true;
+    if (['dist','rem','coord'].includes(f)) tsState.measured = true;
+    if (tsState.measured) {
+      document.getElementById('ts-SD').textContent = '52.340 m';
+      document.getElementById('ts-HD').textContent = '52.120 m';
+      document.getElementById('ts-VD').textContent = '+1.920 m';
+      document.getElementById('ts-N').textContent = '1000.524';
+      document.getElementById('ts-E').textContent = '1037.823';
+    }
+    const [msg, type] = msgs[f] || ['Action performed', 'info'];
+    addLog('ts-log', msg, type);
+    draw();
+  };
+  
+  draw();
+  addLog('ts-log', 'Click ① to power on the Total Station', 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIM 4: TRAVERSING
+// ═══════════════════════════════════════════════════════════════
+function buildTraversingSim(container) {
+  const controls = `
+    <div class="ctrl-section">
+      <div class="ctrl-label">Traverse Stations</div>
+      <div class="ctrl-group">
+        <button class="ctrl-btn" onclick="travStep('s1')">① Set up at Station A</button>
+        <button class="ctrl-btn" onclick="travStep('s2')">② Measure to Station B</button>
+        <button class="ctrl-btn" onclick="travStep('s3')">③ Shift to B, Measure to C</button>
+        <button class="ctrl-btn" onclick="travStep('s4')">④ Continue C → D → E</button>
+        <button class="ctrl-btn" onclick="travStep('s5')">⑤ Close Traverse (E → A)</button>
+        <button class="ctrl-btn" onclick="travStep('area')">⑥ Calculate 2D Area</button>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Coordinate Table</div>
+      <div class="readout" style="font-size:0.68rem;">
+        <div class="readout-row"><span class="readout-key">Stn A</span><span class="readout-val">N:0, E:0</span></div>
+        <div class="readout-row"><span class="readout-key">Stn B</span><span class="readout-val" id="c-b">—</span></div>
+        <div class="readout-row"><span class="readout-key">Stn C</span><span class="readout-val" id="c-c">—</span></div>
+        <div class="readout-row"><span class="readout-key">Stn D</span><span class="readout-val" id="c-d">—</span></div>
+        <div class="readout-row"><span class="readout-key">Stn E</span><span class="readout-val" id="c-e">—</span></div>
+        <div class="readout-row"><span class="readout-key" style="color:var(--accent3)">AREA</span><span class="readout-val" id="c-area" style="color:var(--accent3)">—</span></div>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Log</div>
+      <div class="status-log" id="trav-log"></div>
+    </div>`;
+  
+  const canvas = mkSimShell(container, 'Traversing with Total Station', 'Exp 9 · Closed Traverse & Area Calculation', controls, 'trav-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  // Traverse polygon coords (normalized 0-1)
+  const stations = [
+    {name:'A', nx:0.2, ny:0.6, N:0, E:0},
+    {name:'B', nx:0.5, ny:0.2, N:null, E:null},
+    {name:'C', nx:0.78, ny:0.28, N:null, E:null},
+    {name:'D', nx:0.82, ny:0.62, N:null, E:null},
+    {name:'E', nx:0.38, ny:0.78, N:null, E:null},
+  ];
+  const coords = [{N:0,E:0},{N:48.2,E:36.5},{N:42.1,E:74.8},{N:8.3,E:80.2},{N:-18.5,E:22.4}];
+  
+  let travState = {done: 0, area: null};
+  
+  function draw() {
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = '#060c18'; ctx.fillRect(0,0,w,h);
+    
+    const toX = nx => nx * w;
+    const toY = ny => ny * h;
+    
+    // Draw traverse lines
+    for (let i = 0; i < travState.done && i < stations.length; i++) {
+      const a = stations[i], b = stations[(i+1) % stations.length];
+      if (i < travState.done - 1 || travState.done >= stations.length) {
+        ctx.strokeStyle = i < travState.done - 1 ? '#34d399' : '#f59e0b';
+        ctx.lineWidth = 2;
+        ctx.beginPath(); ctx.moveTo(toX(a.nx), toY(a.ny)); ctx.lineTo(toX(b.nx), toY(b.ny)); ctx.stroke();
+      }
+    }
+    
+    // Closing line
+    if (travState.done >= 5) {
+      const a = stations[4], b = stations[0];
+      ctx.strokeStyle = '#34d399'; ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(toX(a.nx),toY(a.ny)); ctx.lineTo(toX(b.nx),toY(b.ny)); ctx.stroke();
+    }
+    
+    // Fill polygon if area calculated
+    if (travState.area) {
+      ctx.beginPath();
+      stations.forEach((s,i) => i===0 ? ctx.moveTo(toX(s.nx),toY(s.ny)) : ctx.lineTo(toX(s.nx),toY(s.ny)));
+      ctx.closePath();
+      ctx.fillStyle = 'rgba(52,211,153,0.08)'; ctx.fill();
+      ctx.strokeStyle = 'rgba(52,211,153,0.5)'; ctx.lineWidth = 2; ctx.stroke();
+      
+      ctx.fillStyle = '#34d399'; ctx.font = 'bold 14px Syne'; ctx.textAlign = 'center';
+      ctx.fillText('Area = ' + travState.area + ' m²', w/2, h/2);
+    }
+    
+    // Stations
+    stations.forEach((s, i) => {
+      const x = toX(s.nx), y = toY(s.ny);
+      const done = i < travState.done;
+      ctx.beginPath(); ctx.arc(x,y,8,0,Math.PI*2);
+      ctx.fillStyle = done ? 'rgba(52,211,153,0.2)' : 'rgba(100,116,139,0.1)';
+      ctx.fill();
+      ctx.strokeStyle = done ? '#34d399' : '#475569'; ctx.lineWidth = 2; ctx.stroke();
+      ctx.fillStyle = done ? '#34d399' : '#64748b';
+      ctx.font = 'bold 12px Syne'; ctx.textAlign = 'center';
+      ctx.fillText(s.name, x, y - 14);
+      if (done && coords[i]) {
+        ctx.font = '9px Space Mono';
+        ctx.fillText(`N:${coords[i].N}`, x, y + 20);
+        ctx.fillText(`E:${coords[i].E}`, x, y + 30);
+      }
+    });
+    
+    // Instrument marker
+    if (travState.done > 0 && travState.done <= 5) {
+      const s = stations[travState.done - 1];
+      const x = toX(s.nx), y = toY(s.ny);
+      ctx.beginPath(); ctx.arc(x,y,12,0,Math.PI*2);
+      ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 2;
+      ctx.setLineDash([3,3]); ctx.stroke(); ctx.setLineDash([]);
+      ctx.fillStyle = '#f59e0b'; ctx.font = '9px Space Mono'; ctx.textAlign = 'center';
+      ctx.fillText('TS HERE', x, y + 25);
+    }
+  }
+  
+  const travMsgs = {
+    s1: ['Set up Total Station at A (N:0, E:0). Oriented to north.', 'info'],
+    s2: ['Measured to B: N=48.2, E=36.5. MEAS/SAVE pressed. Moving to B.', 'success'],
+    s3: ['At B → measured to C: N=42.1, E=74.8. Continuing...', 'success'],
+    s4: ['Stations C, D, E measured. C(42.1,74.8) D(8.3,80.2) E(-18.5,22.4)', 'success'],
+    s5: ['Traverse closed! E → A measurement complete. Graphical view shows closed loop.', 'success'],
+    area: ['S Func → Calculation → 2D Surface → All → Accept: AREA = 4,821.5 m²', 'success']
+  };
+  
+  const coordUpdates = {
+    s1: 1, s2: 2, s3: 3, s4: 5, s5: 5
+  };
+  
+  window.travStep = function(s) {
+    travState.done = coordUpdates[s] || travState.done;
+    if (s === 's2') document.getElementById('c-b').textContent = 'N:48.2, E:36.5';
+    if (s === 's3') document.getElementById('c-c').textContent = 'N:42.1, E:74.8';
+    if (s === 's4') { document.getElementById('c-d').textContent = 'N:8.3, E:80.2'; document.getElementById('c-e').textContent = 'N:-18.5, E:22.4'; }
+    if (s === 'area') { travState.area = '4,821.5'; document.getElementById('c-area').textContent = '4,821.5 m²'; }
+    const [msg, type] = travMsgs[s] || ['Done', 'info'];
+    addLog('trav-log', msg, type);
+    draw();
+  };
+  
+  draw();
+  addLog('trav-log', 'Click Step 1 to begin traversing', 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIM 5: CURVE
+// ═══════════════════════════════════════════════════════════════
+function buildCurveSim(container) {
+  const controls = `
+    <div class="ctrl-section">
+      <div class="ctrl-label">Curve Parameters</div>
+      <div class="ctrl-row">
+        <span>Radius (m)</span>
+        <span class="ctrl-val" id="cv-r">50</span>
+      </div>
+      <input type="range" class="ctrl-slider" min="20" max="120" value="50" id="cv-r-sl" oninput="updateCurve()">
+      <div class="ctrl-row" style="margin-top:0.5rem;">
+        <span>Central Angle (°)</span>
+        <span class="ctrl-val" id="cv-a">60</span>
+      </div>
+      <input type="range" class="ctrl-slider" min="10" max="150" value="60" id="cv-a-sl" oninput="updateCurve()">
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Procedure (Stakeout)</div>
+      <div class="ctrl-group">
+        <button class="ctrl-btn" onclick="curveStep(1)">① Setup TS at P1 (Tangent Point)</button>
+        <button class="ctrl-btn" onclick="curveStep(2)">② Stakeout → Arcs → Key In</button>
+        <button class="ctrl-btn" onclick="curveStep(3)">③ Enter: Method, Start, End, Radius</button>
+        <button class="ctrl-btn" onclick="curveStep(4)">④ Press CALC → STORE</button>
+        <button class="ctrl-btn" onclick="curveStep(5)">⑤ Stake out curve points</button>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Computed Values</div>
+      <div class="readout">
+        <div class="readout-row"><span class="readout-key">Arc Length</span><span class="readout-val" id="cv-arc">—</span></div>
+        <div class="readout-row"><span class="readout-key">Chord Length</span><span class="readout-val" id="cv-chord">—</span></div>
+        <div class="readout-row"><span class="readout-key">Mid-Ordinate</span><span class="readout-val" id="cv-mid">—</span></div>
+        <div class="readout-row"><span class="readout-key">Tangent Length</span><span class="readout-val" id="cv-tan">—</span></div>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Log</div>
+      <div class="status-log" id="curve-log"></div>
+    </div>`;
+  
+  const canvas = mkSimShell(container, 'Setting Out Simple Curve', 'Exp 10 · Rankine\'s Method using Total Station', controls, 'curve-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  let curveState = {R:50, theta:60, step:0};
+  
+  function updateCalcs() {
+    const R = parseFloat(document.getElementById('cv-r-sl').value);
+    const deg = parseFloat(document.getElementById('cv-a-sl').value);
+    document.getElementById('cv-r').textContent = R;
+    document.getElementById('cv-a').textContent = deg;
+    const theta = deg * Math.PI / 180;
+    const arc = (R * theta).toFixed(3);
+    const chord = (2 * R * Math.sin(theta/2)).toFixed(3);
+    const mid = (R * (1 - Math.cos(theta/2))).toFixed(3);
+    const tan = (R * Math.tan(theta/2)).toFixed(3);
+    document.getElementById('cv-arc').textContent = arc + ' m';
+    document.getElementById('cv-chord').textContent = chord + ' m';
+    document.getElementById('cv-mid').textContent = mid + ' m';
+    document.getElementById('cv-tan').textContent = tan + ' m';
+    curveState.R = R; curveState.theta = deg;
+    draw();
+  }
+  
+  function draw() {
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = '#060c18'; ctx.fillRect(0,0,w,h);
+    
+    const cx = w * 0.5, cy = h * 0.65;
+    const scale = Math.min(w,h) * 0.003;
+    const R = curveState.R * scale;
+    const deg = curveState.theta;
+    const theta = deg * Math.PI / 180;
+    
+    // Center of curve
+    const ccx = cx, ccy = cy - R;
+    
+    // Tangent lines
+    const p1x = cx - R * Math.sin(theta/2);
+    const p1y = cy - R + R * Math.cos(theta/2);
+    const p2x = cx + R * Math.sin(theta/2);
+    const p2y = p1y;
+    
+    const tLen = R * 0.6;
+    
+    ctx.strokeStyle = '#2a3a55'; ctx.lineWidth = 1.5;
+    // Left tangent
+    ctx.beginPath(); ctx.moveTo(p1x - tLen, p1y + tLen); ctx.lineTo(p1x, p1y); ctx.stroke();
+    // Right tangent
+    ctx.beginPath(); ctx.moveTo(p2x + tLen, p2y + tLen); ctx.lineTo(p2x, p2y); ctx.stroke();
+    
+    // Chord
+    if (curveState.step >= 4) {
+      ctx.strokeStyle = 'rgba(52,211,153,0.4)'; ctx.lineWidth = 1.5; ctx.setLineDash([5,5]);
+      ctx.beginPath(); ctx.moveTo(p1x, p1y); ctx.lineTo(p2x, p2y); ctx.stroke();
+      ctx.setLineDash([]);
+      // Mid-ordinate
+      const midPtX = cx, midPtY = cy;
+      ctx.strokeStyle = '#38bdf8'; ctx.lineWidth = 1;
+      ctx.beginPath(); ctx.moveTo(cx, (p1y+cy)/2); ctx.lineTo(midPtX, midPtY); ctx.stroke();
+      ctx.fillStyle = '#38bdf8'; ctx.font = '9px Space Mono'; ctx.textAlign = 'left';
+      ctx.fillText('m (mid-ordinate)', midPtX+5, midPtY-5);
+    }
+    
+    // Arc
+    const startAngle = -Math.PI/2 - theta/2;
+    const endAngle = -Math.PI/2 + theta/2;
+    
+    ctx.strokeStyle = '#f59e0b'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.arc(ccx, ccy, R, startAngle, endAngle); ctx.stroke();
+    
+    // Staked points
+    if (curveState.step >= 5) {
+      const nPts = 6;
+      for (let i = 0; i <= nPts; i++) {
+        const a = startAngle + (endAngle - startAngle) * i / nPts;
+        const px = ccx + R * Math.cos(a);
+        const py = ccy + R * Math.sin(a);
+        ctx.beginPath(); ctx.arc(px, py, 4, 0, Math.PI*2);
+        ctx.fillStyle = i === 0 || i === nPts ? '#34d399' : '#f59e0b';
+        ctx.fill();
+      }
+    }
+    
+    // P1, P2, P3 labels
+    [[p1x,p1y,'P1 (Start)','#34d399'],[p2x,p2y,'P2 (End)','#34d399'],[cx,cy,'P3 (Mid)','#38bdf8']].forEach(([x,y,lbl,col])=>{
+      ctx.beginPath(); ctx.arc(x,y,5,0,Math.PI*2);
+      ctx.fillStyle = col; ctx.fill();
+      ctx.fillStyle = col; ctx.font = '10px Syne'; ctx.textAlign = 'center';
+      ctx.fillText(lbl, x, y + 16);
+    });
+    
+    // Radius line
+    if (curveState.step >= 3) {
+      ctx.strokeStyle = 'rgba(100,116,139,0.3)'; ctx.lineWidth = 1; ctx.setLineDash([3,3]);
+      ctx.beginPath(); ctx.moveTo(ccx,ccy); ctx.lineTo(cx,cy); ctx.stroke();
+      ctx.setLineDash([]);
+      ctx.fillStyle = '#64748b'; ctx.font = '9px Space Mono'; ctx.textAlign = 'center';
+      ctx.fillText('R = ' + curveState.R + 'm', (ccx+cx)/2+10, (ccy+cy)/2);
+      
+      // Center mark
+      ctx.beginPath(); ctx.arc(ccx,ccy,4,0,Math.PI*2);
+      ctx.fillStyle = '#475569'; ctx.fill();
+      ctx.fillStyle = '#64748b'; ctx.font = '9px Space Mono'; ctx.textAlign = 'center';
+      ctx.fillText('Centre', ccx, ccy-10);
+    }
+    
+    // Central angle
+    ctx.fillStyle = '#f59e0b'; ctx.font = 'bold 11px Space Mono'; ctx.textAlign = 'right';
+    ctx.fillText('θ = ' + deg + '°', w-20, 30);
+  }
+  
+  window.updateCurve = updateCalcs;
+  window.curveStep = function(n) {
+    curveState.step = n;
+    const msgs = [,'TS set up at P1 (starting tangent point). Leveled.','Stakeout → Arcs → Key In selected. Method: Two points and radius.','Parameters entered: Start=BM8, End=BM9, Radius='+curveState.R+'m','CALC pressed → Arc='+document.getElementById('cv-arc').textContent+', Chord='+document.getElementById('cv-chord').textContent+' STORED','Curve points staked out in field at regular intervals ✓'];
+    addLog('curve-log', msgs[n] || 'Done', n === 5 ? 'success' : 'info');
+    draw();
+  };
+  
+  updateCalcs();
+  addLog('curve-log', 'Adjust radius & angle, then follow procedure', 'info');
+}
+
+// ═══════════════════════════════════════════════════════════════
+// SIM 6: GPS
+// ═══════════════════════════════════════════════════════════════
+function buildGPSSim(container) {
+  const controls = `
+    <div class="ctrl-section">
+      <div class="ctrl-label">GPS Operations</div>
+      <div class="ctrl-group">
+        <button class="ctrl-btn" onclick="gpsStep('on')">① Power ON GPS Receiver</button>
+        <button class="ctrl-btn" onclick="gpsStep('lock')">② Wait for Satellite Lock</button>
+        <button class="ctrl-btn" onclick="gpsStep('wp1')">③ Mark Waypoint — Station 1</button>
+        <button class="ctrl-btn" onclick="gpsStep('wp2')">④ Move to Station 2, Mark</button>
+        <button class="ctrl-btn" onclick="gpsStep('wp3')">⑤ Mark Station 3</button>
+        <button class="ctrl-btn" onclick="gpsStep('export')">⑥ Export / Record Data</button>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">GPS Receiver Display</div>
+      <div class="readout">
+        <div class="readout-row"><span class="readout-key">Satellites</span><span class="readout-val" id="gps-sat">0 / 12</span></div>
+        <div class="readout-row"><span class="readout-key">Signal Quality</span><span class="readout-val" id="gps-sig">NO LOCK</span></div>
+        <div class="readout-row"><span class="readout-key">Latitude</span><span class="readout-val" id="gps-lat">—</span></div>
+        <div class="readout-row"><span class="readout-key">Longitude</span><span class="readout-val" id="gps-lon">—</span></div>
+        <div class="readout-row"><span class="readout-key">Elevation</span><span class="readout-val" id="gps-ele">—</span></div>
+        <div class="readout-row"><span class="readout-key">Accuracy</span><span class="readout-val" id="gps-acc">—</span></div>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Recorded Waypoints</div>
+      <div class="readout" style="font-size:0.68rem;" id="gps-wps">
+        <div class="readout-row"><span class="readout-key">No waypoints yet</span><span class="readout-val">—</span></div>
+      </div>
+    </div>
+    <div class="ctrl-section">
+      <div class="ctrl-label">Log</div>
+      <div class="status-log" id="gps-log"></div>
+    </div>`;
+  
+  const canvas = mkSimShell(container, 'GPS Field Data Collection', 'Exp 11 · Trilateration & Waypoint Recording', controls, 'gps-canvas');
+  const ctx = canvas.getContext('2d');
+  
+  let gpsState = {powered:false, sats:0, locked:false, wps:[], animFrame:0};
+  const wp_data = [
+    {lat:'23°47\'32.4"N', lon:'86°26\'15.8"E', ele:'263.5 m'},
+    {lat:'23°47\'29.1"N', lon:'86°26\'18.2"E', ele:'261.2 m'},
+    {lat:'23°47\'25.7"N', lon:'86°26\'21.6"E', ele:'259.8 m'}
+  ];
+  
+  let animId;
+  function animate() {
+    const w = canvas.width, h = canvas.height;
+    ctx.clearRect(0,0,w,h);
+    ctx.fillStyle = '#060c18'; ctx.fillRect(0,0,w,h);
+    
+    gpsState.animFrame++;
+    
+    // Earth circle
+    const ex = w*0.5, ey = h*0.62, er = Math.min(w,h)*0.22;
+    ctx.beginPath(); ctx.arc(ex,ey,er,0,Math.PI*2);
+    ctx.fillStyle = 'rgba(30,58,95,0.5)'; ctx.fill();
+    ctx.strokeStyle = '#1e3a5f'; ctx.lineWidth = 2; ctx.stroke();
+    ctx.fillStyle = '#1e3a5f'; ctx.font = 'bold 11px Syne'; ctx.textAlign = 'center';
+    ctx.fillText('EARTH', ex, ey+4);
+    
+    // IIT ISM marker
+    const recX = ex + er * 0.3, recY = ey - er * 0.2;
+    ctx.beginPath(); ctx.arc(recX, recY, 5, 0, Math.PI*2);
+    ctx.fillStyle = '#f59e0b'; ctx.fill();
+    ctx.fillStyle = '#f59e0b'; ctx.font = '8px Space Mono'; ctx.textAlign = 'left';
+    ctx.fillText('IIT(ISM)', recX+8, recY+3);
+    
+    // Satellites orbiting
+    if (gpsState.powered) {
+      const nSats = gpsState.sats;
+      for (let i = 0; i < 12; i++) {
+        const orbitR = er * 1.7 + (i % 3) * 20;
+        const ang = (i * Math.PI * 2 / 12) + gpsState.animFrame * 0.005 * (i%2===0?1:-1);
+        const sx = ex + Math.cos(ang) * orbitR;
+        const sy = ey + Math.sin(ang) * orbitR * 0.5;
+        
+        const active = i < nSats;
+        ctx.beginPath(); ctx.arc(sx,sy,5,0,Math.PI*2);
+        ctx.fillStyle = active ? '#f59e0b' : 'rgba(100,116,139,0.3)'; ctx.fill();
+        ctx.strokeStyle = active ? '#f59e0b' : '#475569'; ctx.lineWidth = 1; ctx.stroke();
+        
+        // Signal beam
+        if (active && gpsState.locked) {
+          ctx.strokeStyle = 'rgba(245,158,11,0.15)'; ctx.lineWidth = 1;
+          ctx.beginPath(); ctx.moveTo(sx,sy); ctx.lineTo(recX,recY); ctx.stroke();
+        }
+      }
+    }
+    
+    // Waypoints on ground
+    gpsState.wps.forEach((wp, i) => {
+      const wx = recX + (i-1)*25, wy = recY + i*8;
+      ctx.beginPath(); ctx.arc(wx, wy, 4, 0, Math.PI*2);
+      ctx.fillStyle = '#34d399'; ctx.fill();
+      ctx.fillStyle = '#34d399'; ctx.font = '8px Space Mono'; ctx.textAlign = 'center';
+      ctx.fillText('WP'+wp, wx, wy-10);
+    });
+    
+    // Signal quality bars
+    if (gpsState.powered) {
+      for (let i = 0; i < 5; i++) {
+        const bh = (i+1) * 8;
+        const filled = i < Math.floor(gpsState.sats / 2.5);
+        ctx.fillStyle = filled ? '#34d399' : 'rgba(52,211,153,0.2)';
+        ctx.fillRect(w-80 + i*12, h-20-bh, 8, bh);
+      }
+      ctx.fillStyle = '#34d399'; ctx.font = '9px Space Mono'; ctx.textAlign = 'center';
+      ctx.fillText(gpsState.sats + ' SAT', w-50, h-25);
+    }
+    
+    animId = requestAnimationFrame(animate);
+  }
+  
+  animate();
+  
+  window.gpsStep = function(s) {
+    if (s === 'on') { gpsState.powered = true; gpsState.sats = 2; document.getElementById('gps-sat').textContent = '2 / 12'; document.getElementById('gps-sig').textContent = 'SEARCHING...'; addLog('gps-log', 'GPS powered ON. Searching for satellites...', 'info'); }
+    if (s === 'lock') {
+      gpsState.sats = 7; gpsState.locked = true;
+      document.getElementById('gps-sat').textContent = '7 / 12';
+      document.getElementById('gps-sig').textContent = '✓ LOCKED (3m accuracy)';
+      document.getElementById('gps-lat').textContent = '23°47\'32.4"N';
+      document.getElementById('gps-lon').textContent = '86°26\'15.8"E';
+      document.getElementById('gps-ele').textContent = '263.5 m';
+      document.getElementById('gps-acc').textContent = '±3.0 m';
+      addLog('gps-log', '7 satellites locked. Accuracy ±3m. Ready to mark waypoints.', 'success');
+    }
+    if (s.startsWith('wp')) {
+      const n = parseInt(s[2]);
+      if (!gpsState.locked) { addLog('gps-log', 'Need satellite lock first!', 'warn'); return; }
+      gpsState.wps.push(n);
+      const d = wp_data[n-1];
+      document.getElementById('gps-lat').textContent = d.lat;
+      document.getElementById('gps-lon').textContent = d.lon;
+      document.getElementById('gps-ele').textContent = d.ele;
+      addLog('gps-log', `WP${n} marked: Lat=${d.lat} Lon=${d.lon} Ele=${d.ele}`, 'success');
+      // Update waypoints table
+      const wpsEl = document.getElementById('gps-wps');
+      wpsEl.innerHTML = gpsState.wps.map(i => {
+        const dd = wp_data[i-1];
+        return `<div class="readout-row"><span class="readout-key">WP${i}</span><span class="readout-val" style="font-size:0.6rem">${dd.lat}<br>${dd.ele}</span></div>`;
+      }).join('');
+    }
+    if (s === 'export') { addLog('gps-log', 'Data exported to KML/CSV. Import into QGIS/Google Earth for mapping.', 'success'); }
+  };
+  
+  addLog('gps-log', 'Click Step 1 to power on GPS', 'info');
+  
+  // Cleanup on back
+  const origBack = window.backToList;
+  window.backToList = function() { if (animId) cancelAnimationFrame(animId); origBack(); };
+}
+
+// ─── UTILITIES ─────────────────────────────────────────────────
+function fmtAngle(deg) {
+  const d = Math.floor(deg);
+  const mFull = (deg - d) * 60;
+  const m = Math.floor(mFull);
+  const s = Math.floor((mFull - m) * 60);
+  return `${d}°${String(m).padStart(2,'0')}'${String(s).padStart(2,'0')}"`;
+}
+</script>
+</body>
+</html>
